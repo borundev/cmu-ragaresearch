@@ -5,7 +5,8 @@ import tensorflow as tf
 class PeriodicPaddingConv2D(keras.layers.Conv2D):
 
     # Note this ONLY works now for filter size 3 and stride of 1
-
+    # Based on  https://stackoverflow.com/questions/39088489/tensorflow-periodic-padding
+    
     def __init__(self, *args, **kwargs):
         padding_val = kwargs.pop('padding', None)
         if padding_val == 'same':
