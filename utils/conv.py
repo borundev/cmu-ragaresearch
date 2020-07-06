@@ -25,3 +25,22 @@ class PeriodicPaddingConv2D(keras.layers.Conv2D):
         return super().call(x)
 
 
+class OnlyTimeConvolution(tf.keras.layers.Layer):
+
+    def __init__(self, num_filters, filter_size, *args, **kwargs):
+        name = kwargs.pop('name', None)
+        super().__init__(name=name)
+        self.tr1 = keras.layers.Lambda(lambda x: tf.transpose(x, [0, 2, 1, 3]))
+        self.tr2 = keras.layers.Lambda(lambda x: tf.transpose(x, [0, 2, 1, 3]))
+        self.c = tf.keras.layers.Conv1D(num_filters,
+                                        filter_size,
+                                        data_format='channels_last', *args, **kwargs)
+
+    def build(self, input_shape):
+        self.num_channels = input_shape[1]
+
+    def call(self, x):
+        x = self.tr1(x)
+        x = tf.stack([self.c(x[:, :, i]) for i in range(self.num_channels)], 2)
+        x = self.tr2(x)
+        return x
