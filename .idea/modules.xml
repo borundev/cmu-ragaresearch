@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/PhonoNet.iml" filepath="$PROJECT_DIR$/.idea/PhonoNet.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/cmu-ragaresearch.iml" filepath="$PROJECT_DIR$/.idea/cmu-ragaresearch.iml" />
     </modules>
   </component>
 </project>
