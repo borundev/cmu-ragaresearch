@@ -118,7 +118,7 @@ class ResNet(Boilerplate):
         out = F.adaptive_avg_pool2d(out, 1)  # adapts to any output size
         out = out.view(out.size(0), -1)
         out = self.linear(out)
-        return F.log_softmax(out)
+        return F.log_softmax(out,1)
 
 
 def ResNet18Circular(**kwargs):
