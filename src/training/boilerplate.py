@@ -29,7 +29,7 @@ class Boilerplate(pl.LightningModule):
         y_score = self(x)
         _, y_pred = torch.max(y_score, 1)
 
-        return {'y_score': y_score, 'y_pred': y_pred, 'y_true': y_true}
+        return {'y_score': y_score.detach().cpu(), 'y_pred': y_pred.detach().cpu(), 'y_true': y_true.detach().cpu()}
 
     def validation_epoch_end(self, outputs):
         # Get y_score / y_pred
@@ -41,8 +41,8 @@ class Boilerplate(pl.LightningModule):
         # log = {'val_' + k: v for k, v in self.get_metrics(y_score, y_true).items()}
         log = self.get_val_metrics(y_score, y_true)
         log['step'] = self.current_epoch
-        log['log'] = copy.deepcopy(log)
-        return log
+        for k,v in log.items():
+            self.log(k,v)
 
     def get_val_metrics(self, y_score, y_true):
         log = {'val_' + k: v for k, v in self.get_metrics(y_score, y_true).items()}
@@ -64,7 +64,6 @@ class Boilerplate(pl.LightningModule):
 
         maxk = max(topk)
         batch_size = target.size(0)
-        print(output.shape)
         _, pred = output.topk(maxk, dim=1)
         pred = pred.t()
         correct = pred.eq(target.reshape(1, -1).expand_as(pred))
@@ -81,7 +80,7 @@ class Boilerplate(pl.LightningModule):
         x, y_true = batch
         y_score = self(x)
         _, y_pred = torch.max(y_score, 1)
-        return {'y_score': y_score, 'y_pred': y_pred, 'y_true': y_true}
+        return {'y_score': y_score.detach().cpu(), 'y_pred': y_pred.detach().cpu(), 'y_true': y_true .detach().cpu()}
 
     def aggregation_fn(self, x, y_true):
         return torch.mean(x, dim=0, keepdim=True)
@@ -97,8 +96,10 @@ class Boilerplate(pl.LightningModule):
 
         self.test_visualizations(y_score, y_pred, y_true)
         log = self.get_val_metrics(y_score, y_true)
-        log['log'] = copy.deepcopy(log)
-        return log
+
+        for k, v in log.items():
+            self.log(k, v)
+
 
     def training_step(self, batch, batch_idx):
         x, y_true = batch  # full song from data loader
