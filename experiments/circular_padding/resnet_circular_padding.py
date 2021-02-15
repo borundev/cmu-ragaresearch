@@ -14,12 +14,12 @@ from src.training import Boilerplate
 
 
 class CylindricalConv(nn.Module):
-    def __init__(self, channels_in, channels_out, padding=1, **kwargs):
-        torch.manual_seed(42)
+    def __init__(self, channels_in, channels_out,kernel_size, stride=1, **kwargs):
         super().__init__()
+        padding = kernel_size // 2
         self.zero_pad = nn.ZeroPad2d((padding, padding, 0, 0))
-        self.conv = nn.Conv2d(channels_in, channels_out, padding=(padding, 0),
-                              padding_mode='circular', **kwargs)
+        self.conv = nn.Conv2d(channels_in, channels_out, kernel_size, padding=(padding, 0),
+                              padding_mode='circular', stride=(1,stride), **kwargs)
 
     def forward(self, x):
         return self.conv(self.zero_pad(x))
@@ -30,7 +30,7 @@ class BasicBlock(nn.Module):
 
     def __init__(self, in_planes, planes, stride=1):
         super(BasicBlock, self).__init__()
-        self.conv1 = CylindricalConv(in_planes, planes, kernel_size=3, stride=[1, stride],
+        self.conv1 = CylindricalConv(in_planes, planes, kernel_size=3, stride=stride,
                                      bias=False)  # stride is always 1 in freq. axis
         self.bn1 = nn.BatchNorm2d(planes)
         self.conv2 = CylindricalConv(planes, planes, kernel_size=3, bias=False)
@@ -39,8 +39,8 @@ class BasicBlock(nn.Module):
         self.shortcut = nn.Sequential()
         if stride != 1 or in_planes != self.expansion * planes:
             self.shortcut = nn.Sequential(
-                nn.Conv2d(in_planes, self.expansion * planes,
-                          kernel_size=1, stride=[1, stride], bias=False),  # stride is always 1 in freq. axis
+                CylindricalConv(in_planes, self.expansion * planes,
+                          kernel_size=1, stride=stride, bias=False),  # stride is always 1 in freq. axis
                 nn.BatchNorm2d(self.expansion * planes)
             )
 
@@ -58,21 +58,21 @@ class Bottleneck(nn.Module):
     def __init__(self, in_planes, planes, stride=1):
         super(Bottleneck, self).__init__()
 
-        self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=1, bias=False)
+        self.conv1 = CylindricalConv(in_planes, planes, kernel_size=1, bias=False)
         self.bn1 = nn.BatchNorm2d(planes)
         self.conv2 = CylindricalConv(planes, planes, kernel_size=3,
-                                     stride=[1, stride],
+                                     stride=stride,
                                      bias=False)  # stride is always 1 in freq. axis
         self.bn2 = nn.BatchNorm2d(planes)
-        self.conv3 = nn.Conv2d(planes, self.expansion *
+        self.conv3 = CylindricalConv(planes, self.expansion *
                                planes, kernel_size=1, bias=False)
         self.bn3 = nn.BatchNorm2d(self.expansion * planes)
 
         self.shortcut = nn.Sequential()
         if stride != 1 or in_planes != self.expansion * planes:
             self.shortcut = nn.Sequential(
-                nn.Conv2d(in_planes, self.expansion * planes,
-                          kernel_size=1, stride=[1, stride], bias=False),  # stride is always 1 in freq. axis
+                CylindricalConv(in_planes, self.expansion * planes,
+                          kernel_size=1, stride=stride, bias=False),  # stride is always 1 in freq. axis
                 nn.BatchNorm2d(self.expansion * planes)
             )
 
