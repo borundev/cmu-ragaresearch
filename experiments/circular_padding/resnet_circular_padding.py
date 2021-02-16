@@ -15,7 +15,6 @@ from src.training import Boilerplate
 
 class CylindricalConv(nn.Module):
     def __init__(self, channels_in, channels_out, padding=1, **kwargs):
-        torch.manual_seed(42)
         super().__init__()
         self.zero_pad = nn.ZeroPad2d((padding, padding, 0, 0))
         self.conv = nn.Conv2d(channels_in, channels_out, padding=(padding, 0),
